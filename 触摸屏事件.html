@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0"/>
+    <title>touch</title>
+    <style>
+        html {
+            font-size: 16px;
+        }
+        ul,ol,li,p,h1,h2,h3,h4,h5,h6{
+            padding: 0;
+            margin:0;
+        }
+        ul li{
+            list-style: none;
+        }
+        a{
+            text-decoration: none;
+        }
+        .after:after{
+            content:"";
+            display: block;
+            clear: both;
+        }
+        .hide{
+            display:none;
+        }
+        .show{
+            display:block;
+        }
+        .fl{
+            float:left;
+        }
+        .fr{
+            float:right;
+        }
+        #container{
+            width:80%;
+            margin:5rem auto;
+            border:1px solid #333333;
+        }
+        ul{
+            width:100%;
+        }
+        ul li{
+            float:left;
+            width:32.5%;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        ul li a{
+            display:inline-block;
+            width:100%;
+        }
+        .active{
+            border-bottom: 1px solid transparent;
+            border-left:1px solid transparent;
+            border-right:1px solid transparent;
+        }
+        .content{
+            width:100%;
+            height:30rem;
+        }
+        #slider{
+            width:100%;
+            height:30rem;
+            overflow: hidden;
+            position:relative;
+        }
+        #slider ul{
+            position:absolute;
+            left:0;
+        }
+        #slider ul li{
+            border:none;
+            width:33.3%;
+        }
+        #slider ul li img{
+            max-width:100%;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <ul class="after">
+        <li class="active"><a href="#page1">第一个</a></li>
+        <li><a href="#page2">第二个</a></li>
+        <li><a href="#page3">第三个</a></li>
+    </ul>
+    <div id="page1" class="content show">第一个页面
+        <div id="slider" class="after">
+            <ul class="after" id = "slider_ul">
+                <li>
+                    <img src="img/img/1.jpg" alt="0">
+                    <p>这是第一张图片</p>
+                </li>
+                <li>
+                    <img src="img/img/2.jpg" alt="1">
+                    <p>这是第二张图片</p>
+                </li>
+                <li>
+                    <img src="img/img/3.jpg" alt="2">
+                    <p>这是第三张图片</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="page2" class="content hide">第二个页面</div>
+    <div id="page3" class="content hide">第三个页面</div>
+</div>
+<script src="js/jquery-1.11.3.js"></script>
+<script>
+    var slider = document.getElementById("slider");
+    var slider_ul = document.getElementById("slider_ul")
+    var width_ul = getComputedStyle(slider).width;
+    slider_ul.style.width = parseFloat(width_ul)*3 + "px";
+    var sliderTouch={
+        elem:slider_ul,
+        valueX:0,
+        moved:0,
+        init:function () {
+            slider_ul.addEventListener("touchstart",this.start,false);
+            slider_ul.addEventListener("touchmove",this.move,false);
+            slider_ul.addEventListener("touchend",this.end,false);
+        },
+        start:function (event) {
+            event.preventDefault();
+            var startX = event.changedTouches[0].clientX;
+            this.valueX = startX;
+        },
+        move:function (event) {
+            event.preventDefault();
+            var moveX = event.changedTouches[0].clientX;
+            this.moved = moveX - this.valueX;
+            var left = getComputedStyle(slider_ul).left;
+            var alt = event.changedTouches[0].target.alt;
+            var move_left = (parseFloat("-"+parseFloat(width_ul)*alt)+this.moved)+"px";
+            if(this.moved<0 && parseFloat(left) > ("-"+parseFloat(width_ul))*2){
+                slider_ul.style.left =move_left;
+            }
+            if(this.moved>0 && parseFloat(left) < 0){
+                slider_ul.style.left =move_left;
+            }
+        },
+        end:function (event) {
+            var left = getComputedStyle(slider_ul).left;
+            if(this.moved < -50){
+                if(parseFloat(left) > ("-"+parseFloat(width_ul))*2){
+                    slider_ul.style.left = (parseFloat(left) - parseFloat(width_ul) - parseFloat(this.moved))+"px";
+                }
+            }
+            if(this.moved > 50){
+                if(parseFloat(left) < 0){
+                    slider_ul.style.left = (parseFloat(left) + parseFloat(width_ul) - parseFloat(this.moved))+"px";
+                }
+            }
+        }
+    }
+    sliderTouch.init();
+    $("ul[class='after'] li").on("click",function (e) {
+        e.preventDefault()
+        $(this).addClass('active').siblings().removeClass('active');
+        var id = $(this).children().attr('href');
+        $(id).removeClass('hide').addClass('show').siblings('div').removeClass('show').addClass('hide')
+    })
+</script>
+</body>
+</html>
